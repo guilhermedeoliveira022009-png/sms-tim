@@ -43,12 +43,8 @@
     const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
     const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
     
-    // Lista de proxies de emergência
-    const PROXIES = [
-        "https://allorigins.win",
-        "https://corsproxy.io?",
-        "https://codetabs.com"
-    ];
+    // Proxy de força bruta para GitHub Pages
+    const PROXY = "https://allorigins.win";
 
     function log(m, color = null) {
         const c = document.getElementById('log-console');
@@ -68,31 +64,19 @@
         }, 4000);
     }
 
-    async function gerarNumero(pIndex = 0) {
-        if (pIndex >= PROXIES.length) {
-            log("ERRO_CRITICO: TODAS_AS_PONTES_FALHARAM", "#ff4444");
-            document.getElementById('btn-main').disabled = false;
-            return;
-        }
-
+    async function gerarNumero() {
         const btn = document.getElementById('btn-main');
         btn.disabled = true;
-        log(`REQUISITANDO_VIA_PONTE_${pIndex + 1}...`);
+        log("REQUISITANDO_IDENTIDADE...");
 
+        // Endpoint direto e limpo
         const target = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
-        const proxyUrl = PROXIES[pIndex] + encodeURIComponent(target);
-
+        
         try {
-            const response = await fetch(proxyUrl);
-            let data;
-            
-            // AllOrigins retorna JSON, os outros texto puro
-            if (proxyUrl.includes("allorigins")) {
-                const json = await response.json();
-                data = json.contents;
-            } else {
-                data = await response.text();
-            }
+            // Requisição com bypass de cache para evitar o Erro 502
+            const response = await fetch(`${PROXY}${encodeURIComponent(target)}&timestamp=${new Date().getTime()}`);
+            const json = await response.json();
+            const data = json.contents;
 
             if (data && data.includes('ACCESS_NUMBER')) {
                 const parts = data.split(':');
@@ -101,12 +85,13 @@
                 document.getElementById('num-display').innerText = '+' + parts[2];
                 monitorarSMS(parts[1]);
             } else {
-                log("RESPOSTA: " + data, "#ff7a00");
+                // Se estiver com saldo zero, o Hero-SMS retorna NO_BALANCE
+                log("RESPOSTA_SERVIDOR: " + data, "#ff7a00");
                 btn.disabled = false;
             }
         } catch (error) {
-            log(`PONTE_${pIndex + 1}_FALHOU. TENTANDO_PROXIMA...`);
-            gerarNumero(pIndex + 1);
+            log("ERRO_DE_SINAL: TENTANDO_RECONECTAR...");
+            setTimeout(gerarNumero, 3000);
         }
     }
 
@@ -114,8 +99,9 @@
         const interval = setInterval(async () => {
             const target = `https://hero-sms.com{API_KEY}&action=getStatus&id=${id}`;
             try {
-                const r = await fetch(PROXIES[1] + encodeURIComponent(target));
-                const s = await r.text();
+                const r = await fetch(`${PROXY}${encodeURIComponent(target)}&timestamp=${new Date().getTime()}`);
+                const j = await r.json();
+                const s = j.contents;
                 if (s && s.includes('STATUS_OK')) {
                     log("SMS_DECRIPTADO!", "#22c55e");
                     document.getElementById('sms-status').innerText = "CÓDIGO:";
@@ -124,7 +110,7 @@
                     d.innerText = s.split(':')[1];
                     clearInterval(interval);
                 } else {
-                    log("VARRENDO_SINAL...");
+                    log("SCANNING_SATELLITE...");
                 }
             } catch (e) {}
         }, 7000);
