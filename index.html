@@ -29,32 +29,28 @@
     </div>
 
     <div id="gen-area" style="display: none;">
-        <p style="font-size: 11px; color: #888; margin-bottom: 15px; font-family: 'Source Code Pro';">PAGAMENTO CONFIRMADO! CLIQUE ABAIXO PARA RESGATAR O NÚMERO NA NOVA ABA.</p>
+        <p style="font-size: 11px; color: #888; margin-bottom: 15px; font-family: 'Source Code Pro';">PAGAMENTO CONFIRMADO! CLIQUE ABAIXO PARA ABRIR A REQUISIÇÃO.</p>
         <button onclick="abrirLink()" class="btn-action btn-gen" style="display:block;">Resgatar Número Virtual</button>
     </div>
 </div>
 
 <script>
-    // Chave e Link corrigidos sem colchetes ou erros de sintaxe
-    const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
     const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
 
     function fazerPagamento() {
         navigator.clipboard.writeText(PIX_CHAVE);
-        document.getElementById('btn-pay').innerText = "COPIADO COM SUCESSO!";
+        document.getElementById('btn-pay').innerText = "COPIADO!";
         
         setTimeout(() => {
             document.getElementById('pay-area').style.display = 'none';
             document.getElementById('gen-area').style.display = 'block';
-            const c = document.getElementById('log-console');
-            c.innerHTML += `<br>> PAGAMENTO_APROVADO<br>> ACESSO_LIBERADO`;
+            document.getElementById('log-console').innerHTML += `<br>> PAGAMENTO_APROVADO<br>> ACESSO_LIBERADO`;
         }, 4000);
     }
 
     function abrirLink() {
-        // URL MONTADA CORRETAMENTE SEM ERROS DE DIGITAÇÃO
-        const urlFinal = "https://hero-sms.com" + API_KEY + "&action=getNumber&service=wa&country=13";
-        window.open(urlFinal, '_blank');
+        // LINK DIRETO SEM VARIÁVEIS PARA EVITAR O ERRO DE DNS
+        window.open("https://hero-sms.com", "_blank");
     }
 </script>
 </body>
