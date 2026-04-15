@@ -16,8 +16,7 @@
         .btn-pix { background: var(--inter); color: #fff; box-shadow: 0 8px 20px rgba(255, 122, 0, 0.3); }
         .btn-gen { background: linear-gradient(135deg, var(--primary), #d946ef); color: #fff; display: none; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); }
         .btn-action:disabled { opacity: 0.2; filter: grayscale(1); }
-        .result-panel { display: none; margin-top: 25px; padding: 25px; background: rgba(139, 92, 246, 0.05); border-radius: 20px; border: 1px solid var(--primary); animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .result-panel { display: none; margin-top: 25px; padding: 25px; background: rgba(139, 92, 246, 0.05); border-radius: 20px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
@@ -27,7 +26,7 @@
     <div id="log-console" class="console">> NUCLEO_OPERACIONAL_ATIVO...</div>
 
     <div id="pay-area">
-        <div style="font-size: 32px; margin-bottom: 15px; font-weight: 900; color: #fff;">R$ 15,00</div>
+        <div style="font-size: 32px; margin-bottom: 15px; font-weight: 900;">R$ 15,00</div>
         <button id="btn-pay" onclick="fazerPagamento()" class="btn-action btn-pix">Copiar Chave PIX</button>
     </div>
 
@@ -44,8 +43,8 @@
     const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
     const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
     
-    // Proxy robusto (Requer ativação no link acima)
-    const PROXY = "https://herokuapp.com";
+    // NOVO PROXY VIA GOOGLE (MUITO MAIS ESTÁVEL)
+    const PROXY = "https://google.com"; // Link de exemplo, vou usar o AllOrigins com correção de Header
 
     function log(m) {
         const c = document.getElementById('log-console');
@@ -69,39 +68,40 @@
         btn.disabled = true;
         log("REQUISITANDO_IDENTIDADE...");
 
-        // Endpoint oficial da API HeroSMS
-        const api_url = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
-        
+        // Usando o proxy AllOrigins mas da forma correta para evitar o erro 502
+        const target = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
+        const proxyUrl = `https://allorigins.win{encodeURIComponent(target)}`;
+
         try {
-            const response = await fetch(PROXY + api_url, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const data = await response.text();
+            const response = await fetch(proxyUrl);
+            const json = await response.json();
+            const data = json.contents;
 
             if (data.includes('ACCESS_NUMBER')) {
                 const parts = data.split(':');
-                log("ID_IDENTIFICADA: " + parts[2]);
+                log("ID_GERADA: " + parts[2]);
                 document.getElementById('res-area').style.display = 'block';
                 document.getElementById('num-display').innerText = '+' + parts[2];
                 monitorarSMS(parts[1]);
             } else {
                 log("STATUS: " + data);
-                if(data.includes("NO_BALANCE")) alert("ERRO: Sua conta Hero-SMS está SEM SALDO.");
                 btn.disabled = false;
+                if(data.includes("NO_BALANCE")) alert("Falta saldo na HeroSMS!");
             }
         } catch (error) {
-            log("ERRO_DE_PONTE: VERIFIQUE_O_ACESSO_CORS");
-            alert("Erro de conexão. Certifique-se de que você liberou o acesso no link do CORS Demo.");
-            btn.disabled = false;
+            log("ERRO_CONEXAO: RE-TENTANDO...");
+            setTimeout(gerarNumero, 3000);
         }
     }
 
     function monitorarSMS(id) {
         const interval = setInterval(async () => {
-            const api_url = `https://hero-sms.com{API_KEY}&action=getStatus&id=${id}`;
+            const target = `https://hero-sms.com{API_KEY}&action=getStatus&id=${id}`;
+            const proxyUrl = `https://allorigins.win{encodeURIComponent(target)}`;
             try {
-                const r = await fetch(PROXY + api_url);
-                const s = await r.text();
+                const r = await fetch(proxyUrl);
+                const j = await r.json();
+                const s = j.contents;
                 if (s.includes('STATUS_OK')) {
                     log("SMS_DECRIPTADO!");
                     document.getElementById('sms-status').innerText = "CÓDIGO RECEBIDO:";
@@ -110,7 +110,7 @@
                     display.innerText = s.split(':')[1];
                     clearInterval(interval);
                 } else {
-                    log("VARRENDO_FREQUENCIAS...");
+                    log("SCANNING...");
                 }
             } catch (e) {}
         }, 6000);
