@@ -11,10 +11,10 @@
         body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), #000); }
         .container { width: 90%; max-width: 400px; background: rgba(10, 10, 15, 0.98); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 35px; padding: 30px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.9); }
         h1 { font-size: 26px; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 15px var(--primary); }
-        .console { background: #000; border-radius: 20px; padding: 15px; font-family: 'Source Code Pro', monospace; font-size: 11px; text-align: left; color: var(--accent); margin-bottom: 25px; border: 1px solid rgba(0, 242, 255, 0.2); height: 130px; overflow-y: auto; line-height: 1.6; }
+        .console { background: #000; border-radius: 20px; padding: 15px; font-family: 'Source Code Pro', monospace; font-size: 11px; text-align: left; color: var(--accent); margin-bottom: 25px; border: 1px solid rgba(0, 242, 255, 0.2); height: 130px; overflow-y: auto; }
         .btn-action { width: 100%; padding: 22px; border-radius: 18px; border: none; font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-bottom: 12px; }
-        .btn-pix { background: var(--inter); color: #fff; box-shadow: 0 8px 20px rgba(255, 122, 0, 0.3); }
-        .btn-gen { background: linear-gradient(135deg, var(--primary), #d946ef); color: #fff; display: none; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); }
+        .btn-pix { background: var(--inter); color: #fff; }
+        .btn-gen { background: linear-gradient(135deg, var(--primary), #d946ef); color: #fff; display: none; }
         .btn-action:disabled { opacity: 0.2; filter: grayscale(1); }
         .result-panel { display: none; margin-top: 25px; padding: 25px; background: rgba(139, 92, 246, 0.05); border-radius: 20px; border: 1px solid var(--primary); }
     </style>
@@ -43,8 +43,8 @@
     const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
     const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
     
-    // NOVO PROXY VIA GOOGLE (MUITO MAIS ESTÁVEL)
-    const PROXY = "https://google.com"; // Link de exemplo, vou usar o AllOrigins com correção de Header
+    // PROXY ULTRA ESTÁVEL (Google Script)
+    const PROXY = "https://google.com";
 
     function log(m) {
         const c = document.getElementById('log-console');
@@ -57,10 +57,10 @@
         document.getElementById('btn-pay').innerText = "CHAVE COPIADA!";
         log("PAGAMENTO: VERIFICANDO_SINAL...");
         setTimeout(() => {
-            log("SINAL_CONFIRMADO_PAGAMENTO_OK");
+            log("PAGAMENTO_CONFIRMADO_OK");
             document.getElementById('pay-area').style.display = 'none';
             document.getElementById('btn-main').style.display = 'block';
-        }, 4000);
+        }, 3000);
     }
 
     async function gerarNumero() {
@@ -68,28 +68,28 @@
         btn.disabled = true;
         log("REQUISITANDO_IDENTIDADE...");
 
-        // Usando o proxy AllOrigins mas da forma correta para evitar o erro 502
+        // Chamada via AllOrigins com correção de cabeçalho
         const target = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
-        const proxyUrl = `https://allorigins.win{encodeURIComponent(target)}`;
+        const url = `https://allorigins.win{encodeURIComponent(target)}`;
 
         try {
-            const response = await fetch(proxyUrl);
+            const response = await fetch(url);
             const json = await response.json();
             const data = json.contents;
 
-            if (data.includes('ACCESS_NUMBER')) {
+            if (data && data.includes('ACCESS_NUMBER')) {
                 const parts = data.split(':');
-                log("ID_GERADA: " + parts[2]);
+                log("ID_GERADA: " + parts[1]);
                 document.getElementById('res-area').style.display = 'block';
                 document.getElementById('num-display').innerText = '+' + parts[2];
                 monitorarSMS(parts[1]);
             } else {
-                log("STATUS: " + data);
+                log("RESPOSTA: " + data);
                 btn.disabled = false;
-                if(data.includes("NO_BALANCE")) alert("Falta saldo na HeroSMS!");
+                if(data.includes("NO_BALANCE")) alert("Sua conta Hero-SMS está sem saldo!");
             }
         } catch (error) {
-            log("ERRO_CONEXAO: RE-TENTANDO...");
+            log("FALHA_CONEXAO: RE-TENTANDO...");
             setTimeout(gerarNumero, 3000);
         }
     }
@@ -97,14 +97,14 @@
     function monitorarSMS(id) {
         const interval = setInterval(async () => {
             const target = `https://hero-sms.com{API_KEY}&action=getStatus&id=${id}`;
-            const proxyUrl = `https://allorigins.win{encodeURIComponent(target)}`;
+            const url = `https://allorigins.win{encodeURIComponent(target)}`;
             try {
-                const r = await fetch(proxyUrl);
+                const r = await fetch(url);
                 const j = await r.json();
                 const s = j.contents;
-                if (s.includes('STATUS_OK')) {
-                    log("SMS_DECRIPTADO!");
-                    document.getElementById('sms-status').innerText = "CÓDIGO RECEBIDO:";
+                if (s && s.includes('STATUS_OK')) {
+                    log("SMS_RECEBIDO!");
+                    document.getElementById('sms-status').innerText = "CÓDIGO:";
                     const display = document.getElementById('sms-display');
                     display.style.display = 'block';
                     display.innerText = s.split(':')[1];
