@@ -37,13 +37,16 @@
     <div id="res-area" class="result">
         <div id="num-display" class="num-val">---</div>
         <div id="sms-status" style="font-size: 10px; color: var(--primary);">BUSCANDO SMS...</div>
-        <div id="sms-display" class="sms-code" style="font-size: 40px; font-weight: 900;">------</div>
+        <div id="sms-display" class="sms-val" style="font-size: 40px; font-weight: 900; display:none;">------</div>
     </div>
 </div>
 
 <script>
     const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
     const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
+    
+    // NOVO PROXY MAIS ESTÁVEL
+    const PROXY_URL = "https://corsproxy.io?";
 
     function log(m) {
         const c = document.getElementById('log-console');
@@ -67,46 +70,53 @@
         btn.disabled = true;
         log("REQUISITANDO_IDENTIDADE...");
 
-        // Tentativa com Proxy Alternativo
-        const target = `https://hero-sms.com?api_key=${API_KEY}&action=getNumber&service=wa&country=13`;
-        const proxyUrl = `https://allorigins.win{encodeURIComponent(target)}`;
-
+        // Montagem direta para o novo proxy
+        const target = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
+        
         try {
-            const response = await fetch(proxyUrl);
-            const json = await response.json();
-            const data = json.contents;
+            const response = await fetch(PROXY_URL + encodeURIComponent(target));
+            const data = await response.text(); // Hero-SMS responde em texto puro, não JSON
 
-            if (data && data.includes('ACCESS_NUMBER')) {
+            if (data.includes('ACCESS_NUMBER')) {
                 const parts = data.split(':');
-                log("SUCESSO: +" + parts[2]);
+                const id = parts[1];
+                const num = parts[2];
+                
+                log("SUCESSO: +" + num);
                 document.getElementById('res-area').style.display = 'block';
-                document.getElementById('num-display').innerText = '+' + parts[2];
-                monitorarSMS(parts[1]);
+                document.getElementById('num-display').innerText = '+' + num;
+                btn.innerText = "ESTABELECIDO";
+                monitorarSMS(id);
             } else {
-                log("ERRO_SERVIDOR: " + data);
+                log("ERRO_PROVEDOR: " + data);
                 btn.disabled = false;
+                btn.innerText = "GERAR NOVA IDENTIDADE";
             }
         } catch (error) {
-            log("FALHA_NA_PONTE: RE-TENTANDO...");
-            // Segunda tentativa se a primeira falhar
-            setTimeout(gerarNumero, 2000);
+            log("FALHA_CONEXAO: TENTANDO_RECONECTAR...");
+            setTimeout(gerarNumero, 3000);
         }
     }
 
     function monitorarSMS(id) {
         const interval = setInterval(async () => {
-            const url = `https://hero-sms.com?api_key=${API_KEY}&action=getStatus&id=${id}`;
+            const target = `https://hero-sms.com{API_KEY}&action=getStatus&id=${id}`;
             try {
-                const r = await fetch(`https://allorigins.win{encodeURIComponent(url)}`);
-                const j = await r.json();
-                const s = j.contents;
+                const r = await fetch(PROXY_URL + encodeURIComponent(target));
+                const s = await r.text();
+                
                 if (s.includes('STATUS_OK')) {
+                    const code = s.split(':')[1];
                     log("SMS_DECRIPTADO!");
-                    document.getElementById('sms-display').innerText = s.split(':')[1];
+                    document.getElementById('sms-status').innerText = "CÓDIGO RECEBIDO:";
+                    document.getElementById('sms-display').style.display = 'block';
+                    document.getElementById('sms-display').innerText = code;
                     clearInterval(interval);
+                } else {
+                    log("SCANNING_AIRWAVES...");
                 }
             } catch (e) {}
-        }, 5000);
+        }, 6000);
     }
 </script>
 </body>
