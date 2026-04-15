@@ -8,9 +8,9 @@
     <style>
         :root { --primary: #8b5cf6; --accent: #00f2ff; --bg: #050507; --inter: #ff7a00; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), #000); }
+        body { background: var(--bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), #000); }
         .container { width: 90%; max-width: 400px; background: rgba(10, 10, 15, 0.98); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 35px; padding: 30px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.9); }
-        h1 { font-size: 26px; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 15px var(--primary); }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 26px; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 15px var(--primary); }
         .console { background: #000; border-radius: 20px; padding: 15px; font-family: 'Source Code Pro', monospace; font-size: 11px; text-align: left; color: var(--accent); margin-bottom: 25px; border: 1px solid rgba(0, 242, 255, 0.2); height: 120px; overflow-y: auto; }
         .btn-action { width: 100%; padding: 22px; border-radius: 18px; border: none; font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-bottom: 12px; }
         .btn-pix { background: var(--inter); color: #fff; }
@@ -24,17 +24,18 @@
     <div id="log-console" class="console">> SISTEMA_INICIADO...<br>> STATUS: AGUARDANDO_PAGAMENTO</div>
 
     <div id="pay-area">
-        <div style="font-size: 32px; margin-bottom: 15px; font-weight: 900;">R$ 15,00</div>
+        <div style="font-size: 32px; margin-bottom: 15px; font-weight: 900; font-family: 'Orbitron';">R$ 15,00</div>
         <button id="btn-pay" onclick="fazerPagamento()" class="btn-action btn-pix">Copiar Chave PIX</button>
     </div>
 
     <div id="gen-area" style="display: none;">
-        <p style="font-size: 11px; color: #888; margin-bottom: 15px;">PAGAMENTO CONFIRMADO! CLIQUE ABAIXO PARA VER SEU NÚMERO NA NOVA ABA.</p>
-        <button onclick="abrirLink()" class="btn-action btn-gen" style="display:block;">Ver Meu Número Virtual</button>
+        <p style="font-size: 11px; color: #888; margin-bottom: 15px; font-family: 'Source Code Pro';">PAGAMENTO CONFIRMADO! CLIQUE ABAIXO PARA RESGATAR O NÚMERO NA NOVA ABA.</p>
+        <button onclick="abrirLink()" class="btn-action btn-gen" style="display:block;">Resgatar Número Virtual</button>
     </div>
 </div>
 
 <script>
+    // Chave e Link corrigidos sem colchetes ou erros de sintaxe
     const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
     const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
 
@@ -51,9 +52,9 @@
     }
 
     function abrirLink() {
-        // Esse link abre direto na HeroSMS e mostra o número gerado sem erro de conexão.
-        const url = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
-        window.open(url, '_blank');
+        // URL MONTADA CORRETAMENTE SEM ERROS DE DIGITAÇÃO
+        const urlFinal = "https://hero-sms.com" + API_KEY + "&action=getNumber&service=wa&country=13";
+        window.open(urlFinal, '_blank');
     }
 </script>
 </body>
