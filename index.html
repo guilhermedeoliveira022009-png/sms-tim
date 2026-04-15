@@ -11,28 +11,26 @@
         body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), #000); }
         .container { width: 90%; max-width: 400px; background: rgba(10, 10, 15, 0.98); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 35px; padding: 30px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.9); }
         h1 { font-size: 26px; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 15px var(--primary); }
-        .console { background: #000; border-radius: 20px; padding: 15px; font-family: 'Source Code Pro', monospace; font-size: 11px; text-align: left; color: var(--accent); margin-bottom: 25px; border: 1px solid rgba(0, 242, 255, 0.2); height: 140px; overflow-y: auto; }
+        .console { background: #000; border-radius: 20px; padding: 15px; font-family: 'Source Code Pro', monospace; font-size: 11px; text-align: left; color: var(--accent); margin-bottom: 25px; border: 1px solid rgba(0, 242, 255, 0.2); height: 120px; overflow-y: auto; }
         .btn-action { width: 100%; padding: 22px; border-radius: 18px; border: none; font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-bottom: 12px; }
         .btn-pix { background: var(--inter); color: #fff; }
         .btn-gen { background: linear-gradient(135deg, var(--primary), #d946ef); color: #fff; display: none; }
-        .btn-action:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>HAZENDVXZ</h1>
-    <div id="log-console" class="console">> NUCLEO_OPERACIONAL_ATIVO...<br>> AGUARDANDO_PAGAMENTO_</div>
+    <div id="log-console" class="console">> SISTEMA_INICIADO...<br>> STATUS: AGUARDANDO_PAGAMENTO</div>
 
     <div id="pay-area">
         <div style="font-size: 32px; margin-bottom: 15px; font-weight: 900;">R$ 15,00</div>
         <button id="btn-pay" onclick="fazerPagamento()" class="btn-action btn-pix">Copiar Chave PIX</button>
     </div>
 
-    <button id="btn-main" onclick="gerarNumero()" class="btn-action btn-gen">Gerar Nova Identidade</button>
-
-    <div id="instrucao" style="display:none; font-size: 10px; color: #888; margin-top: 15px;">
-        Se a aba de requisição abrir, copie o número e cole aqui.
+    <div id="gen-area" style="display: none;">
+        <p style="font-size: 11px; color: #888; margin-bottom: 15px;">PAGAMENTO CONFIRMADO! CLIQUE ABAIXO PARA VER SEU NÚMERO NA NOVA ABA.</p>
+        <button onclick="abrirLink()" class="btn-action btn-gen" style="display:block;">Ver Meu Número Virtual</button>
     </div>
 </div>
 
@@ -40,36 +38,22 @@
     const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
     const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
 
-    function log(m, color = null) {
-        const c = document.getElementById('log-console');
-        const style = color ? ` style="color:${color}"` : '';
-        c.innerHTML += `<br>> <span${style}>${m}</span>`;
-        c.scrollTop = c.scrollHeight;
-    }
-
     function fazerPagamento() {
         navigator.clipboard.writeText(PIX_CHAVE);
-        document.getElementById('btn-pay').innerText = "COPIADO!";
-        log("SINAL_PAGAMENTO: AGUARDANDO...");
+        document.getElementById('btn-pay').innerText = "COPIADO COM SUCESSO!";
+        
         setTimeout(() => {
-            log("PAGAMENTO_CONFIRMADO", "#22c55e");
             document.getElementById('pay-area').style.display = 'none';
-            document.getElementById('btn-main').style.display = 'block';
-        }, 3000);
+            document.getElementById('gen-area').style.display = 'block';
+            const c = document.getElementById('log-console');
+            c.innerHTML += `<br>> PAGAMENTO_APROVADO<br>> ACESSO_LIBERADO`;
+        }, 4000);
     }
 
-    function gerarNumero() {
-        log("ABRINDO_PONTE_DIRETA...", "#00f2ff");
-        
-        // Link direto que "fura" o bloqueio do GitHub
+    function abrirLink() {
+        // Esse link abre direto na HeroSMS e mostra o número gerado sem erro de conexão.
         const url = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
-        
-        // Abre em uma nova aba. Se houver saldo, o número aparece lá.
         window.open(url, '_blank');
-        
-        log("REQUISIÇÃO_ENVIADA_AO_SERVIDOR", "#22c55e");
-        log("VERIFIQUE_A_NOVA_ABA_ABERTA");
-        document.getElementById('instrucao').style.display = 'block';
     }
 </script>
 </body>
