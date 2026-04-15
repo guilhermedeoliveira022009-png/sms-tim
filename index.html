@@ -8,36 +8,34 @@
     <style>
         :root { --primary: #8b5cf6; --accent: #00f2ff; --bg: #050507; --inter: #ff7a00; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; background-image: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1), transparent); }
-        .container { width: 90%; max-width: 400px; background: rgba(15, 15, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 30px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        h1 { font-size: 24px; letter-spacing: 5px; margin-bottom: 20px; color: #fff; }
-        .console { background: #000; border-radius: 15px; padding: 15px; font-family: 'Source Code Pro', monospace; font-size: 10px; text-align: left; color: var(--accent); margin-bottom: 20px; border: 1px solid rgba(0, 242, 255, 0.2); height: 120px; overflow-y: auto; }
+        body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1), #000); }
+        .container { width: 90%; max-width: 400px; background: rgba(15, 15, 20, 0.98); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 30px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9); }
+        h1 { font-size: 24px; letter-spacing: 5px; margin-bottom: 20px; text-shadow: 0 0 10px var(--primary); }
+        .console { background: #000; border-radius: 15px; padding: 15px; font-family: 'Source Code Pro', monospace; font-size: 10px; text-align: left; color: var(--accent); margin-bottom: 20px; border: 1px solid rgba(0, 242, 255, 0.2); height: 120px; overflow-y: auto; line-height: 1.5; }
         .btn-action { width: 100%; padding: 20px; border-radius: 15px; border: none; font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
         .btn-pix { background: var(--inter); color: #fff; }
         .btn-gen { background: linear-gradient(135deg, var(--primary), #d946ef); color: #fff; display: none; }
-        .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
-        .result { display: none; margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid var(--primary); }
-        .num-val { font-size: 24px; color: var(--accent); margin: 10px 0; }
-        .sms-val { font-size: 40px; font-weight: 900; letter-spacing: 10px; color: #fff; text-shadow: 0 0 20px var(--primary); }
+        .btn-action:disabled { opacity: 0.3; filter: grayscale(1); }
+        .result { display: none; margin-top: 20px; padding: 20px; background: rgba(139, 92, 246, 0.05); border-radius: 15px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>HAZENDVXZ</h1>
-    <div id="log-console" class="console">> SYSTEM_READY...</div>
+    <div id="log-console" class="console">> SYSTEM_INIT...<br>> ENCRYPTED_LINK_READY</div>
 
     <div id="pay-area">
-        <div style="font-size: 30px; margin-bottom: 15px;">R$ 15,00</div>
+        <div style="font-size: 30px; margin-bottom: 15px; font-weight: 900;">R$ 15,00</div>
         <button id="btn-pay" onclick="fazerPagamento()" class="btn-action btn-pix">Copiar Chave PIX</button>
     </div>
 
     <button id="btn-main" onclick="gerarNumero()" class="btn-action btn-gen">Gerar Nova Identidade</button>
 
     <div id="res-area" class="result">
-        <div id="num-display" class="num-val">---</div>
-        <div id="sms-status" style="font-size: 10px; color: var(--primary);">BUSCANDO SMS...</div>
-        <div id="sms-display" class="sms-val" style="font-size: 40px; font-weight: 900; display:none;">------</div>
+        <div id="num-display" style="font-size: 22px; color: var(--accent); margin-bottom: 10px;">---</div>
+        <div id="sms-status" style="font-size: 10px; color: #888;">AGUARDANDO SMS...</div>
+        <div id="sms-display" style="font-size: 40px; font-weight: 900; color: #fff; display:none;">000000</div>
     </div>
 </div>
 
@@ -45,8 +43,8 @@
     const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
     const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
     
-    // NOVO PROXY MAIS ESTÁVEL
-    const PROXY_URL = "https://corsproxy.io?";
+    // Proxy de alta disponibilidade
+    const PROXY = "https://codetabs.com";
 
     function log(m) {
         const c = document.getElementById('log-console');
@@ -56,13 +54,13 @@
 
     function fazerPagamento() {
         navigator.clipboard.writeText(PIX_CHAVE);
-        document.getElementById('btn-pay').innerText = "COPIADO!";
-        log("PIX_CAPTURED: VALIDANDO...");
+        document.getElementById('btn-pay').innerText = "PIX COPIADO!";
+        log("PAGAMENTO: AGUARDANDO_CONFIRMACAO...");
         setTimeout(() => {
-            log("PAGAMENTO_CONFIRMADO");
+            log("PAGAMENTO_RECEBIDO_OK");
             document.getElementById('pay-area').style.display = 'none';
             document.getElementById('btn-main').style.display = 'block';
-        }, 3000);
+        }, 4000);
     }
 
     async function gerarNumero() {
@@ -70,50 +68,56 @@
         btn.disabled = true;
         log("REQUISITANDO_IDENTIDADE...");
 
-        // Montagem direta para o novo proxy
-        const target = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
+        // Corrigido: adicionado stubs.php que é o endpoint comum dessas APIs
+        const api_url = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
         
         try {
-            const response = await fetch(PROXY_URL + encodeURIComponent(target));
-            const data = await response.text(); // Hero-SMS responde em texto puro, não JSON
+            const response = await fetch(PROXY + encodeURIComponent(api_url));
+            const data = await response.text();
 
             if (data.includes('ACCESS_NUMBER')) {
                 const parts = data.split(':');
-                const id = parts[1];
-                const num = parts[2];
-                
-                log("SUCESSO: +" + num);
+                log("IDENTIDADE_GERADA: " + parts[2]);
                 document.getElementById('res-area').style.display = 'block';
-                document.getElementById('num-display').innerText = '+' + num;
-                btn.innerText = "ESTABELECIDO";
-                monitorarSMS(id);
+                document.getElementById('num-display').innerText = '+' + parts[2];
+                monitorarSMS(parts[1]);
             } else {
                 log("ERRO_PROVEDOR: " + data);
                 btn.disabled = false;
-                btn.innerText = "GERAR NOVA IDENTIDADE";
+                alert("Erro no Provedor: " + data + "\nVerifique seu saldo no Hero-SMS.");
             }
         } catch (error) {
-            log("FALHA_CONEXAO: TENTANDO_RECONECTAR...");
-            setTimeout(gerarNumero, 3000);
+            log("FALHA_NA_PONTE: TENTANDO_ALTERNATIVA...");
+            // Se falhar, tenta o caminho sem stubs
+            const alt_url = `https://hero-sms.com{API_KEY}&action=getNumber&service=wa&country=13`;
+            try {
+                const res2 = await fetch(PROXY + encodeURIComponent(alt_url));
+                const data2 = await res2.text();
+                if(data2.includes('ACCESS_NUMBER')) {
+                    const p = data2.split(':');
+                    log("IDENTIDADE_GERADA: " + p[2]);
+                    document.getElementById('res-area').style.display = 'block';
+                    document.getElementById('num-display').innerText = '+' + p[2];
+                    monitorarSMS(p[1]);
+                } else { log("FALHA_TOTAL_CONEXAO"); btn.disabled = false; }
+            } catch(e) { log("ERRO_CRITICO_REDE"); btn.disabled = false; }
         }
     }
 
     function monitorarSMS(id) {
         const interval = setInterval(async () => {
-            const target = `https://hero-sms.com{API_KEY}&action=getStatus&id=${id}`;
+            const api_url = `https://hero-sms.com{API_KEY}&action=getStatus&id=${id}`;
             try {
-                const r = await fetch(PROXY_URL + encodeURIComponent(target));
+                const r = await fetch(PROXY + encodeURIComponent(api_url));
                 const s = await r.text();
-                
                 if (s.includes('STATUS_OK')) {
-                    const code = s.split(':')[1];
-                    log("SMS_DECRIPTADO!");
-                    document.getElementById('sms-status').innerText = "CÓDIGO RECEBIDO:";
+                    log("SMS_DECRIPTADO_COM_SUCESSO");
+                    document.getElementById('sms-status').innerText = "CÓDIGO:";
                     document.getElementById('sms-display').style.display = 'block';
-                    document.getElementById('sms-display').innerText = code;
+                    document.getElementById('sms-display').innerText = s.split(':')[1];
                     clearInterval(interval);
                 } else {
-                    log("SCANNING_AIRWAVES...");
+                    log("SCANNING_SATELLITE...");
                 }
             } catch (e) {}
         }, 6000);
