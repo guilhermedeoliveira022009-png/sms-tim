@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAZENDVXZ | Quantum SIM</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        :root { --primary: #8b5cf6; --accent: #00f2ff; --bg: #050507; --inter: #ff7a00; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif;
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            background-image: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1), transparent);
+        }
+        .container {
+            width: 90%; max-width: 400px; background: rgba(15, 15, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px;
+            padding: 30px; text-align: center; backdrop-filter: blur(10px);
+        }
+        h1 { font-size: 24px; letter-spacing: 5px; margin-bottom: 20px; color: #fff; }
+        .console {
+            background: #000; border-radius: 15px; padding: 15px; font-family: 'Source Code Pro', monospace;
+            font-size: 10px; text-align: left; color: var(--accent); margin-bottom: 20px;
+            border: 1px solid rgba(0, 242, 255, 0.2); min-height: 100px;
+        }
+        .btn-action {
+            width: 100%; padding: 20px; border-radius: 15px; border: none;
+            font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase;
+            cursor: pointer; transition: 0.3s; margin-bottom: 10px;
+        }
+        .btn-pix { background: var(--inter); color: #fff; }
+        .btn-gen { background: linear-gradient(135deg, var(--primary), #d946ef); color: #fff; display: none; }
+        .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
+        .result { display: none; margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid var(--primary); }
+        .num-val { font-size: 24px; color: var(--accent); margin: 10px 0; }
+        .sms-val { font-size: 40px; font-weight: 900; letter-spacing: 10px; color: #fff; text-shadow: 0 0 20px var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>HAZENDVXZ</h1>
+    
+    <div id="log-console" class="console">
+        > SYSTEM_READY...<br>
+        > AGUARDANDO_PAGAMENTO_
+    </div>
+
+    <div id="pay-area">
+        <div style="font-size: 30px; margin-bottom: 15px;">R$ 15,00</div>
+        <button id="btn-pay" onclick="fazerPagamento()" class="btn-action btn-pix">Copiar Chave PIX</button>
+    </div>
+
+    <button id="btn-main" onclick="gerarNumero()" class="btn-action btn-gen">Gerar Nova Identidade</button>
+
+    <div id="res-area" class="result">
+        <div style="font-size: 10px; color: #666;">IDENTIDADE ATIVA:</div>
+        <div id="num-display" class="num-val">---</div>
+        <hr style="opacity:0.1; margin:15px 0;">
+        <div id="sms-status" style="font-size: 10px; color: var(--primary);">AGUARDANDO SMS...</div>
+        <div id="sms-display" class="sms-val" style="display:none;">------</div>
+    </div>
+</div>
+
+<script>
+    const API_KEY = '44BfdB0Bc62ce8082994ccd65B19B4B0';
+    const PROXY = 'https://allorigins.win';
+    const PIX_CHAVE = "00020101021126580014br.gov.bcb.pix01368a947c7a-1abc-481c-86da-f5e795b9735f520400005303986540515.005802BR5917KAMILLY V S SILVA6007BARUERI62070503***63044D60";
+
+    function log(m) {
+        const c = document.getElementById('log-console');
+        c.innerHTML += `<br>> ${m}`;
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function fazerPagamento() {
+        navigator.clipboard.writeText(PIX_CHAVE);
+        document.getElementById('btn-pay').innerText = "PIX COPIADO!";
+        log("PIX_CAPTURED: VALIDANDO_NA_REDE...");
+        
+        setTimeout(() => {
+            log("PAGAMENTO_CONFIRMADO");
+            document.getElementById('pay-area').style.display = 'none';
+            document.getElementById('btn-main').style.display = 'block';
+        }, 4000);
+    }
+
+    async function gerarNumero() {
+        const btn = document.getElementById('btn-main');
+        btn.disabled = true;
+        log("REQUISITANDO_IDENTIDADE...");
+
+        try {
+            const url = `https://hero-sms.com?api_key=${API_KEY}&action=getNumber&service=wa&country=13`;
+            const r = await fetch(`${PROXY}${encodeURIComponent(url)}`);
+            const j = await r.json();
+            const d = j.contents;
+
+            if (d.includes('ACCESS_NUMBER')) {
+                const [_, id, num] = d.split(':');
+                log("SUCESSO: " + num);
+                document.getElementById('res-area').style.display = 'block';
+                document.getElementById('num-display').innerText = '+' + num;
+                checarSMS(id);
+            } else {
+                log("ERRO_PROVEDOR: " + d);
+                alert("Erro: " + d + "\n\nVerifique se há saldo no HeroSMS.");
+                btn.disabled = false;
+            }
+        } catch (e) {
+            log("ERRO_DE_CONEXAO");
+            btn.disabled = false;
+        }
+    }
+
+    function checarSMS(id) {
+        const timer = setInterval(async () => {
+            try {
+                const url = `https://hero-sms.com?api_key=${API_KEY}&action=getStatus&id=${id}`;
+                const r = await fetch(`${PROXY}${encodeURIComponent(url)}`);
+                const j = await r.json();
+                const s = j.contents;
+
+                if (s.includes('STATUS_OK')) {
+                    const code = s.split(':')[1];
+                    log("SMS_DECRIPTADO");
+                    document.getElementById('sms-status').innerText = "CÓDIGO RECEBIDO:";
+                    document.getElementById('sms-display').style.display = 'block';
+                    document.getElementById('sms-display').innerText = code;
+                    clearInterval(timer);
+                }
+            } catch (e) {}
+        }, 5000);
+    }
+</script>
+</body>
+</html>
